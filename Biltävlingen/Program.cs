@@ -24,15 +24,14 @@ class Program
         Car Car2 = new Car(2, "Toyota Yaris", 0, 120, null);   
 
         var carSim1 = CarRace(Car1);
-        var carSim2 = CarRace(Car2);    
-        var carSims = new List<Task> { carSim1, carSim2 };
-        List<Car> cars = new List<Car> { Car1, Car2 };
+        var carSim2 = CarRace(Car2);
+        var carSimStatus = CarStatus(new List<Car> { Car1, Car2 });
+        var carSims = new List<Task> { carSim1, carSim2, carSimStatus };
 
         bool Winner = false;
 
         while (carSims.Count > 0)
         {
-            await CarStatus(cars);
             Task finishedSim = await Task.WhenAny(carSims);
 
             if (finishedSim == carSim1)
@@ -54,6 +53,15 @@ class Program
                     Console.Write($"\n {Car2.Model} is the Winner!\n");
                 }
                 PrintCar(Car2);
+            }
+            else if (finishedSim == carSimStatus)
+            {
+                Console.WriteLine(" ============================================");
+                Console.WriteLine(" |                                          |");
+                Console.WriteLine(" |  All cars have crossed the finish line.  | ");
+                Console.WriteLine(" |  Simulation ending..                     |");
+                Console.WriteLine(" |                                          |");
+                Console.WriteLine(" ============================================");
             }
 
             await finishedSim;
@@ -154,20 +162,29 @@ class Program
     {
         while (true)
         {
+            await Wait(10);
+
             if (Console.KeyAvailable)
             {
                 if (Console.ReadKey(true).Key == ConsoleKey.Enter)
                 {
-                    Console.WriteLine("\n ====================================================================================");
                     cars.ForEach(car =>
                     {
-                        Console.WriteLine($" Car: {car.Model}, Current speed: {car.Speed} km/h, Distance remaining: {Math.Truncate((10 - car.DistanceTraveled) * 100) / 100} km");
+                        if (car.Id == 1)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                        }
+                        Console.WriteLine($" - Car: {car.Model}, Current speed: {car.Speed} km/h, Distance remaining: {Math.Truncate((10 - car.DistanceTraveled) * 100) / 100} km");
+                        Console.ForegroundColor = ConsoleColor.White;
                     });
-                    Console.WriteLine(" ====================================================================================\n");
                 }
             }
 
-            var totalDistance= cars.Select(car => car.DistanceTraveled).Sum();
+            var totalDistance = cars.Select(car => car.DistanceTraveled).Sum();
 
             if (totalDistance >= 20)
             {
@@ -181,10 +198,8 @@ class Program
     {
         string time = string.Format("{0:mm\\:ss\\:ff}", car.FinishTime);
 
-        Console.WriteLine("\n ========================================================================================");
-        Console.WriteLine($" {car.Model} crossed the finish line at {time}." +
-                          $"\n Speed of {car.Speed} km/h and traveled a total of {(int)car.DistanceTraveled} km.");
-        Console.WriteLine(" ========================================================================================\n");
+        Console.WriteLine($"\n {car.Model} crossed the finish line at {time}." +
+                          $"\n Speed of {car.Speed} km/h and traveled a total of {(int)car.DistanceTraveled} km.\n");
     }
 
     // Method to delay task with default value of 30 seconds

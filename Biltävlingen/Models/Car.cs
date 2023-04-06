@@ -13,7 +13,6 @@ namespace Biltävlingen.Models
         public decimal DistanceTraveled { get; set; }
         public decimal Speed { get; set; }
         public TimeSpan? FinishTime { get; set; }
-
         public Car (int id, string model, decimal distance, decimal speed, TimeSpan? finishtime)
         {
             Id = id;
