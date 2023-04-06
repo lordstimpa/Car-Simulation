@@ -24,7 +24,7 @@ Below formula was used to calculate different elements:
 
 ## Structure
 
-The main file (Program.cs) consists of methods which are all run asynchronously. The only method which is run synchronously is PrintCar() which called when a car has crossed the finish line. It displays the time, speed and distance the car traveled.
+The main file (Program.cs) consists of methods which are all run asynchronously. The only method which is run synchronously is PrintCar() which is called when a car has crossed the finish line. It displays the time, speed and distance the car traveled.
 
 Important files in the repository:
 
