@@ -21,16 +21,18 @@ class Program
         Console.ReadLine();
 
         Car Car1 = new Car(1, "Audi Quattro", 0, 120, null);
-        Car Car2 = new Car(2, "Toyota Supra", 0, 120, null);   
+        Car Car2 = new Car(2, "Toyota Yaris", 0, 120, null);   
 
         var carSim1 = CarRace(Car1);
-        var carSim2 = CarRace(Car2);
+        var carSim2 = CarRace(Car2);    
         var carSims = new List<Task> { carSim1, carSim2 };
+        List<Car> cars = new List<Car> { Car1, Car2 };
 
         bool Winner = false;
 
         while (carSims.Count > 0)
         {
+            await CarStatus(cars);
             Task finishedSim = await Task.WhenAny(carSims);
 
             if (finishedSim == carSim1)
@@ -53,6 +55,7 @@ class Program
                 }
                 PrintCar(Car2);
             }
+
             await finishedSim;
             carSims.Remove(finishedSim);
             Console.ForegroundColor = ConsoleColor.White;
@@ -74,8 +77,11 @@ class Program
         Console.WriteLine(" |            Car Race Simulation           |");
         Console.WriteLine(" |                                          |");
         Console.WriteLine(" ============================================");
+        Console.WriteLine("\n Simulation is ACTIVE.");
+        Console.WriteLine(" Simulation is run in 10x the real-time speed.\n");
+        Console.WriteLine(" Press ENTER for current race statistics.\n");
+        Console.WriteLine(" ============================================\n");
 
-        Console.WriteLine("\n Car race simulation is active.\n");
         // Timer start
         timer.Start();
 
@@ -86,7 +92,7 @@ class Program
             {
                 randomNumber = randomEvent.Next(1, 51);
 
-                kmPerSecond = car.Speed / (60 * 60);
+                kmPerSecond = car.Speed / 3600;
                 distanceTraveled = kmPerSecond * 30;     
                 
                 decimal timeRemaining = (raceDistance - car.DistanceTraveled) / kmPerSecond;
@@ -125,7 +131,7 @@ class Program
                     {
                         Console.WriteLine($" {car.Model} engine is tearing (speed reduced by 1 km/h).");
                         car.Speed -= 1;
-                        kmPerSecond = car.Speed / (60 * 60);
+                        kmPerSecond = car.Speed / 3600;
                         distanceTraveled = kmPerSecond * 30;
                         car.DistanceTraveled += distanceTraveled;
                     }
@@ -143,11 +149,34 @@ class Program
         return car;
     }
 
-    public static async Task PrintStatus(List<Task> car)
+    // Method to check status of car in active simulation
+    public static async Task CarStatus(List<Car> cars)
     {
+        while (true)
+        {
+            if (Console.KeyAvailable)
+            {
+                if (Console.ReadKey(true).Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine("\n ====================================================================================");
+                    cars.ForEach(car =>
+                    {
+                        Console.WriteLine($" Car: {car.Model}, Current speed: {car.Speed} km/h, Distance remaining: {Math.Truncate((10 - car.DistanceTraveled) * 100) / 100} km");
+                    });
+                    Console.WriteLine(" ====================================================================================\n");
+                }
+            }
 
+            var totalDistance= cars.Select(car => car.DistanceTraveled).Sum();
+
+            if (totalDistance >= 20)
+            {
+                return;
+            }
+        }
     }
 
+    // Method to display statistics of a car that reaches the finish line
     public static void PrintCar(Car car)
     {
         string time = string.Format("{0:mm\\:ss\\:ff}", car.FinishTime);
@@ -158,6 +187,7 @@ class Program
         Console.WriteLine(" ========================================================================================\n");
     }
 
+    // Method to delay task with default value of 30 seconds
     public async static Task Wait(int delay = 30)
     {
         await Task.Delay(TimeSpan.FromSeconds(delay / 10));
